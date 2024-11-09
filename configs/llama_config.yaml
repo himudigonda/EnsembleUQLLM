@@ -4,9 +4,9 @@ num_labels: 2
 max_length: 512
 
 # Training configuration
-batch_size: 8
-learning_rate: 0.0002
-num_epochs: 3
+batch_size: 16
+learning_rate: 0.00005
+num_epochs: 1 #3
 gradient_accumulation_steps: 4
 warmup_steps: 100
 weight_decay: 0.01
@@ -17,8 +17,8 @@ lora_alpha: 32
 lora_dropout: 0.1
 
 # Uncertainty configuration
-seeds: [42, 43, 44, 45, 46, 47, 48, 49, 50, 51]
-num_ensemble_models: 10
+seeds: [42, 43, 44]
+num_ensemble_models: 3
 
 # Paths
 output_dir: "model_outputs"
