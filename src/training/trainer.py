@@ -37,24 +37,29 @@ class LlamaTrainer:
         for batch in tqdm(self.train_loader, desc="Training"):
             batch = {k: v.to(self.model.device) for k, v in batch.items()}
 
-            with torch.cuda.amp.autocast(enabled=self.config.use_bf16):
+            with torch.amp.autocast(device_type='cuda', dtype=torch.bfloat16 if self.config.use_bf16 else torch.float16):
                 outputs = self.model(**batch)
                 loss = outputs.loss
 
             self.optimizer.zero_grad()
-            if self.scaler:
-                self.scaler.scale(loss).backward()
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-            else:
+
+            if self.config.use_bf16:
+                # Skip scaler when using bf16
                 loss.backward()
                 self.optimizer.step()
-            self.scheduler.step()
+            else:
+                if self.scaler:
+                    self.scaler.scale(loss).backward()
+                    self.scaler.step(self.optimizer)
+                    self.scaler.update()
+                else:
+                    loss.backward()
+                    self.optimizer.step()
 
+            self.scheduler.step()
             total_loss += loss.item()
 
         return total_loss / len(self.train_loader)
-
     @torch.no_grad()
     def evaluate(self):
         self.model.eval()
