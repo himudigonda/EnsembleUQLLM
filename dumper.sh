@@ -7,7 +7,12 @@ function dump_files() {
     # List all files and directories in the current directory
     for file in "$dir"/*; do
         if [ -d "$file" ]; then
-            # If it's a directory, recursively call the function
+            # Skip 'data' and '__pycache__' directories
+            if [[ $(basename "$file") == "data" || $(basename "$file") == "model_outputs" || $(basename "$file") == "__pycache__" ]]; then
+                echo -e "\n--- Skipping directory: $file ---"
+                continue
+            fi
+            # If it's another directory, recursively call the function
             echo -e "\n--- Entering directory: $file ---"
             dump_files "$file"
         elif [ -f "$file" ]; then
