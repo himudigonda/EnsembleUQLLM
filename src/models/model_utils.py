@@ -1,3 +1,4 @@
+from peft import PeftConfig, PeftModel
 import torch
 from transformers import LlamaForSequenceClassification, LlamaTokenizer
 from peft import get_peft_model, LoraConfig, TaskType
@@ -77,8 +78,12 @@ def save_model(model, output_dir: str):
     model.save_pretrained(output_dir)
     print(f"Model saved to {output_dir}")
 
+
 def load_model(config: ModelConfig, model_path: str) -> LlamaForSequenceClassification:
-    """Load a trained model from the specified directory."""
-    model, _ = setup_model_and_tokenizer(config)
-    model.load_state_dict(torch.load(os.path.join(model_path, "pytorch_model.bin")))
+    """Load a trained PEFT model from the specified directory."""
+    model, tokenizer = setup_model_and_tokenizer(config)
+
+    # Load the adapter model directly
+    model = PeftModel.from_pretrained(model, model_path)
+
     return model
