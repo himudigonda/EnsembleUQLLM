@@ -27,11 +27,11 @@ class BoolQDataset(Dataset):
         encoding["labels"] = torch.tensor(1 if item["answer"] else 0)
         return encoding
 
-def create_dataloaders(tokenizer: PreTrainedTokenizer, batch_size: int, max_length: int = 512) -> Tuple[DataLoader, DataLoader]:
+def create_dataloaders(tokenizer: PreTrainedTokenizer, batch_size: int, max_length: int = 512, num_workers: int = 16) -> Tuple[DataLoader, DataLoader]:
     print("INFO: Loading BoolQ dataset")
     train_dataset = BoolQDataset(tokenizer, max_length, "train")
     val_dataset = BoolQDataset(tokenizer, max_length, "validation")
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
     print("INFO: BoolQ dataset loaded")
     return train_loader, val_loader

@@ -1,3 +1,4 @@
+import pandas as pd
 import argparse
 from src.models.model_utils import ModelConfig, setup_model_and_tokenizer
 from src.training.trainer import LlamaTrainer
@@ -12,7 +13,7 @@ def train(config_path, seed):
     print("INFO: Config loaded")
     model, tokenizer = setup_model_and_tokenizer(config, seed)
     print("INFO: Model and tokenizer loaded")
-    train_loader, val_loader = create_dataloaders(tokenizer, config.batch_size, config.max_length)
+    train_loader, val_loader = create_dataloaders(tokenizer, config.batch_size, config.max_length, config.num_workers)
     print("INFO: Training data loaded")
     trainer = LlamaTrainer(model, train_loader, val_loader, config, seed)
     print("INFO: Trainer loaded")
@@ -34,7 +35,7 @@ def inference(config_path):
     _, tokenizer = setup_model_and_tokenizer(config)
 
     # Create data loaders
-    _, val_loader = create_dataloaders(tokenizer, config.batch_size, config.max_length)
+    _, val_loader = create_dataloaders(tokenizer, config.batch_size, config.max_length, config.num_workers)
     print("INFO: Validation data loaded")
 
     # Load models based on seeds specified in the configuration
@@ -48,9 +49,20 @@ def inference(config_path):
     # Calculate uncertainty metrics
     metrics = calculate_uncertainty_metrics(results)
     print("INFO: Uncertainty metrics finished")
+    metrics_df = pd.DataFrame([metrics])
+    print("INFO: Uncertainty metrics Datafrfame Created")
+    metrics_df.to_csv(os.path.join(config.output_dir, "uncertainty_metrics.csv"), index=False)
+    print("INFO: Uncertainty metrics saved to file")
     print(metrics)
-    print("INFO: Inference finished")
 
+    # Save results
+    results_df = pd.DataFrame([results])
+    results_df.to_csv(os.path.join(config.output_dir, "ensemble_results.csv"), index=False)
+    print("INFO: Ensemble results saved to file")
+    print(results)
+
+
+    print("INFO: Inference finished")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

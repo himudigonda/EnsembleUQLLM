@@ -29,6 +29,7 @@ class ModelConfig:
     cache_dir: str
     use_bf16: bool
     num_gpus: int
+    num_workers: int
 
     @classmethod
     def from_yaml(cls, yaml_path: str):
